@@ -299,7 +299,7 @@ void sort_and_output(NAMELIST *list, size_t list_size, FILE *fout){
     /* printf("%s\n", list[i].name);  *//*debug */
     if(maxFrom     < list[i].from           ) maxFrom     = list[i].from;
     if(maxTo       < list[i].to             ) maxTo       = list[i].to;
-    if(maxPosition < list[i].fposition) maxPosition = list[i].fposition;
+    if(maxPosition < list[i].fposition.__pos) maxPosition = list[i].fposition.__pos;
   }
 
   sprintf(tmp, "%ld",  maxFrom    ); orderFrom=strlen(tmp);
