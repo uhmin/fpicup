@@ -53,7 +53,7 @@ sub interface{
 sub help{
     my $file=__FILE__;
     print stderr << "EOF";
-$file: extract specified sequences from 
+$file: extract specified sequences from
 four-lines-per-sequence formatted fastq file.
 
 --- Usage ---
@@ -70,7 +70,7 @@ zcat [fastq file gz] | $file -k [sequence ID(s)]
      Default is F.
 
 EOF
-    ;
+;
     exit(0);
 }
 
@@ -90,14 +90,19 @@ sub reaad_from_list_file{ #($options);
     my %list;
     my $file=$options->{"-l"};
     my $line;
-    
+    my $key;
     open FIN, "$file" or die("Could not open list file: $file\n");
     while($line=<FIN>){
 	chomp($line);
 	$line=~s/^@//;
 	$line=~s/\s.*//;
 	if($line ne ""){
-	    $list{$line}=1;
+	    ($key=$line)=~s/(.*)\/.*/$1/;
+	    if($key eq $line){
+		$list{$key}="";
+	    }else{
+		$list{$key}=$line;
+	    }
 	}
     }
     close FIN;
@@ -109,8 +114,14 @@ sub read_from_options{ #($options);
     my %list;
     my $key=$options->{"-k"};
     my @keys=split(/,/, $key);
+    my $main;
     foreach $key (@keys){
-	$list{$key}=1;
+	($main=$key)=~s/(.*)\/.*/$1/;
+	if($main eq $key){
+	    $list{$main}="";
+	}else{
+	    $list{$main}=$key;
+	}
     }
     return %list;
 }
@@ -121,6 +132,7 @@ sub readFastq{ #(\%options, \%list);
     my $file;
     my $line;
     my $key;
+    my $main;
     my $sw;
     my $i=0;
     *FIN=*STDIN;
@@ -133,7 +145,9 @@ sub readFastq{ #(\%options, \%list);
 	if($i==0 && $line=~/^@/){
 	    ($key=$line)=~s/^@(\S+)\s.*/$1/;
 	    chomp($key);
-	    if(exists($list->{$key})){
+	    ($main=$key)=~s/(.*)\/.*/$1/;
+	    if(exists($list->{$main}) 
+	       && ($list->{$main} eq "" || $list->{$main} eq $key)){
 		$sw=0;
 	    }else{
 		$sw=1;
